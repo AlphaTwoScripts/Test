@@ -22,19 +22,11 @@ local LocalPlayer = Players.LocalPlayer
 local windowState
 local acrylicBlur
 local hasGlobalSetting
-local minimizedWindows = {}
 
 local tabs = {}
 local currentTabInstance = nil
 local tabIndex = 0
 local unloaded = false
-
---// Effects Variables
-local effectsEnabled = true
-local rippleEffects = true
-local hoverEffects = true
-local animateButtons = true
-local animateToggles = true
 
 local assets = {
 	interFont = "rbxassetid://12187365364",
@@ -51,9 +43,10 @@ local assets = {
 	dropdown = "rbxassetid://18865373378",
 	sliderbar = "rbxassetid://18772615246",
 	sliderhead = "rbxassetid://18772834246",
-	discord = "rbxassetid://4146541609", -- Discord icon
-	minimize = "rbxassetid://7743878857", -- Minimize icon
-	maximize = "rbxassetid://7743878718", -- Maximize icon
+	-- Custom window control icons
+	closeIcon = "rbxassetid://125716871945612", -- Replace with your T icon asset ID
+	minimizeIcon = "rbxassetid://13321848320", -- Replace with your eye icon asset ID
+	discordIcon = "rbxassetid://84828491431270", -- Replace with your Discord icon asset ID
 }
 
 --// Functions
@@ -205,7 +198,7 @@ function MacLib:Window(Settings)
 	uIPadding.Parent = controls
 
 	local windowControlSettings = {
-		sizes = { enabled = UDim2.fromOffset(8, 8), disabled = UDim2.fromOffset(7, 7) },
+		sizes = { enabled = UDim2.fromOffset(24, 24), disabled = UDim2.fromOffset(20, 20) },
 		transparencies = { enabled = 0, disabled = 1 },
 		strokeTransparency = 0.9,
 	}
@@ -216,59 +209,120 @@ function MacLib:Window(Settings)
 	stroke.Color = Color3.fromRGB(255, 255, 255)
 	stroke.Transparency = windowControlSettings.strokeTransparency
 
-	local exit = Instance.new("TextButton")
+	local exit = Instance.new("ImageButton")
 	exit.Name = "Exit"
-	exit.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json")
-	exit.Text = ""
-	exit.TextColor3 = Color3.fromRGB(0, 0, 0)
-	exit.TextSize = 14
+	exit.Image = assets.closeIcon
 	exit.AutoButtonColor = false
 	exit.BackgroundColor3 = Color3.fromRGB(250, 93, 86)
 	exit.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	exit.BorderSizePixel = 0
+	exit.Size = UDim2.fromOffset(24, 24)
 
 	local uICorner = Instance.new("UICorner")
 	uICorner.Name = "UICorner"
-	uICorner.CornerRadius = UDim.new(1, 0)
+	uICorner.CornerRadius = UDim.new(0.5, 0)
 	uICorner.Parent = exit
+
+	-- Create the icon for the exit button
+	local exitIcon = Instance.new("ImageLabel")
+	exitIcon.Name = "Icon"
+	exitIcon.Size = UDim2.new(0.7, 0, 0.7, 0)
+	exitIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	exitIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+	exitIcon.BackgroundTransparency = 1
+	exitIcon.Image = assets.closeIcon
+	exitIcon.Parent = exit
 
 	exit.Parent = controls
 
-	local minimize = Instance.new("TextButton")
+	local minimize = Instance.new("ImageButton")
 	minimize.Name = "Minimize"
-	minimize.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json")
-	minimize.Text = ""
-	minimize.TextColor3 = Color3.fromRGB(0, 0, 0)
-	minimize.TextSize = 14
+	minimize.Image = assets.minimizeIcon
 	minimize.AutoButtonColor = false
 	minimize.BackgroundColor3 = Color3.fromRGB(252, 190, 57)
 	minimize.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	minimize.BorderSizePixel = 0
 	minimize.LayoutOrder = 1
+	minimize.Size = UDim2.fromOffset(24, 24)
 
 	local uICorner1 = Instance.new("UICorner")
 	uICorner1.Name = "UICorner"
-	uICorner1.CornerRadius = UDim.new(1, 0)
+	uICorner1.CornerRadius = UDim.new(0.5, 0)
 	uICorner1.Parent = minimize
+
+	-- Create the icon for the minimize button
+	local minimizeIcon = Instance.new("ImageLabel")
+	minimizeIcon.Name = "Icon"
+	minimizeIcon.Size = UDim2.new(0.7, 0, 0.7, 0)
+	minimizeIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	minimizeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+	minimizeIcon.BackgroundTransparency = 1
+	minimizeIcon.Image = assets.minimizeIcon
+	minimizeIcon.Parent = minimize
 
 	minimize.Parent = controls
 
-	local maximize = Instance.new("TextButton")
+	local maximize = Instance.new("ImageButton")
 	maximize.Name = "Maximize"
-	maximize.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json")
-	maximize.Text = ""
-	maximize.TextColor3 = Color3.fromRGB(0, 0, 0)
-	maximize.TextSize = 14
+	maximize.Image = ""
 	maximize.AutoButtonColor = false
 	maximize.BackgroundColor3 = Color3.fromRGB(119, 174, 94)
 	maximize.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	maximize.BorderSizePixel = 0
-	maximize.LayoutOrder = 1
+	maximize.LayoutOrder = 2
+	maximize.Size = UDim2.fromOffset(24, 24)
 
 	local uICorner2 = Instance.new("UICorner")
 	uICorner2.Name = "UICorner"
-	uICorner2.CornerRadius = UDim.new(1, 0)
+	uICorner2.CornerRadius = UDim.new(0.5, 0)
 	uICorner2.Parent = maximize
+
+	maximize.Parent = controls
+	
+	-- Create Discord button
+	local discord = Instance.new("ImageButton")
+	discord.Name = "Discord"
+	discord.Image = ""
+	discord.AutoButtonColor = false
+	discord.BackgroundColor3 = Color3.fromRGB(114, 137, 218) -- Discord color
+	discord.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	discord.BorderSizePixel = 0
+	discord.LayoutOrder = 3
+	discord.Size = UDim2.fromOffset(24, 24)
+
+	local uICorner3 = Instance.new("UICorner")
+	uICorner3.Name = "UICorner"
+	uICorner3.CornerRadius = UDim.new(0.5, 0)
+	uICorner3.Parent = discord
+	
+	-- Create the icon for the discord button
+	local discordIcon = Instance.new("ImageLabel")
+	discordIcon.Name = "Icon"
+	discordIcon.Size = UDim2.new(0.7, 0, 0.7, 0)
+	discordIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	discordIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+	discordIcon.BackgroundTransparency = 1
+	discordIcon.Image = assets.discordIcon
+	discordIcon.Parent = discord
+	
+	discord.Parent = controls
+	
+	discord.Parent = controls
+
+	-- Add Discord button click handler
+	discord.MouseButton1Click:Connect(function()
+		-- Copy server link when clicked
+		local serverLink = Settings.DiscordLink or "https://discord.gg/AZwA92q6Zr"
+		pcall(function()
+			setclipboard(serverLink)
+			-- Use Window:Notify instead of MacLib:Notify
+			WindowFunctions:Notify({
+				Title = "Discord Server",
+				Description = "Discord server link copied to clipboard!", -- Changed Content to Description
+				Lifetime = 3 -- Changed Duration to Lifetime
+			})
+		end)
+	end)
 
 	maximize.Parent = controls
 
@@ -293,7 +347,17 @@ function MacLib:Window(Settings)
 
 	applyState(maximize, false)
 
-	local controlsList = {exit, minimize}
+	-- Add icon to maximize button
+	local maximizeIcon = Instance.new("ImageLabel")
+	maximizeIcon.Name = "Icon"
+	maximizeIcon.Size = UDim2.new(0.7, 0, 0.7, 0)
+	maximizeIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+	maximizeIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+	maximizeIcon.BackgroundTransparency = 1
+	maximizeIcon.Image = "" -- No icon for maximize as it's disabled
+	maximizeIcon.Parent = maximize
+
+	local controlsList = {exit, minimize, discord}
 	for _, button in pairs(controlsList) do
 		local buttonName = button.Name
 		local isEnabled = true
@@ -5267,6 +5331,11 @@ function MacLib:Window(Settings)
 	function WindowFunctions:SetState(State)
 		windowState = State
 		base.Visible = State
+		
+		-- Update toggle button visibility (always visible)
+		if toggleButton then
+			toggleButton.Visible = true
+		end
 	end
 
 	function WindowFunctions:GetState()
@@ -5279,6 +5348,40 @@ function MacLib:Window(Settings)
 		if onUnloadCallback then
 			onUnloadCallback()  
 		end
+		
+		-- Save the toggle button before destroying the UI
+		if toggleButton and toggleButton.Parent == macLib then
+			local savedToggleButton = toggleButton:Clone()
+			local newGui = GetGui()
+			savedToggleButton.Parent = newGui
+			
+			-- Reconnect the click event
+			savedToggleButton.MouseButton1Click:Connect(function()
+				-- Recreate the UI when the toggle button is clicked
+				newGui:Destroy()
+				MacLib:Window(Settings)
+			end)
+			
+			-- Reconnect hover effects
+			savedToggleButton.MouseEnter:Connect(function()
+				Tween(savedToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+					BackgroundTransparency = 0
+				}):Play()
+				Tween(savedToggleButton.UIStroke, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+					Transparency = 0.3
+				}):Play()
+			end)
+			
+			savedToggleButton.MouseLeave:Connect(function()
+				Tween(savedToggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+					BackgroundTransparency = 0.2
+				}):Play()
+				Tween(savedToggleButton.UIStroke, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+					Transparency = 0.7
+				}):Play()
+			end)
+		end
+		
 		macLib:Destroy()
 		unloaded = true
 	end
@@ -5289,6 +5392,41 @@ function MacLib:Window(Settings)
 
 	local MenuKeybind = Settings.Keybind or Enum.KeyCode.RightControl
 
+	-- Create persistent toggle button
+	local toggleButton = Instance.new("ImageButton")
+	toggleButton.Name = "ToggleButton"
+	toggleButton.Size = UDim2.fromOffset(40, 40)
+	toggleButton.Position = UDim2.new(0.97, 0, 0.5, 0)
+	toggleButton.AnchorPoint = Vector2.new(1, 0.5)
+	toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	toggleButton.BackgroundTransparency = 0.2
+	toggleButton.BorderSizePixel = 0
+	toggleButton.Image = ""
+	toggleButton.AutoButtonColor = false
+	toggleButton.Parent = macLib
+	
+	local toggleButtonCorner = Instance.new("UICorner")
+	toggleButtonCorner.CornerRadius = UDim.new(0.5, 0)
+	toggleButtonCorner.Parent = toggleButton
+	
+	local toggleButtonStroke = Instance.new("UIStroke")
+	toggleButtonStroke.Color = Color3.fromRGB(255, 255, 255)
+	toggleButtonStroke.Transparency = 0.7
+	toggleButtonStroke.Thickness = 1.5
+	toggleButtonStroke.Parent = toggleButton
+	
+	local toggleIcon = Instance.new("TextLabel")
+	toggleIcon.Name = "Icon"
+	toggleIcon.Size = UDim2.fromScale(0.7, 0.7)
+	toggleIcon.Position = UDim2.fromScale(0.5, 0.5)
+	toggleIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+	toggleIcon.BackgroundTransparency = 1
+	toggleIcon.Text = "≡"
+	toggleIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+	toggleIcon.TextSize = 24
+	toggleIcon.Font = Enum.Font.GothamBold
+	toggleIcon.Parent = toggleButton
+	
 	local function ToggleMenu()
 		local state = not WindowFunctions:GetState()
 		WindowFunctions:SetState(state)
@@ -5298,6 +5436,27 @@ function MacLib:Window(Settings)
 			Lifetime = 5
 		})
 	end
+	
+	-- Add hover effect to toggle button
+	toggleButton.MouseEnter:Connect(function()
+		Tween(toggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+			BackgroundTransparency = 0
+		}):Play()
+		Tween(toggleButtonStroke, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+			Transparency = 0.3
+		}):Play()
+	end)
+	
+	toggleButton.MouseLeave:Connect(function()
+		Tween(toggleButton, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+			BackgroundTransparency = 0.2
+		}):Play()
+		Tween(toggleButtonStroke, TweenInfo.new(0.2, Enum.EasingStyle.Sine), {
+			Transparency = 0.7
+		}):Play()
+	end)
+	
+	toggleButton.MouseButton1Click:Connect(ToggleMenu)
 
 	UserInputService.InputEnded:Connect(function(inp, gpe)
 		if gpe then return end
@@ -5331,7 +5490,7 @@ function MacLib:Window(Settings)
 
 	function WindowFunctions:SetAcrylicBlurState(State)
 		acrylicBlur = State
-		base.BackgroundTransparency = State and 0.05 or 0
+		base.BackgroundTransparency = State and 0.9 or 0
 	end
 
 	function WindowFunctions:GetAcrylicBlurState()
