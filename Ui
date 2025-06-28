@@ -5430,11 +5430,6 @@ function MacLib:Window(Settings)
 	local function ToggleMenu()
 		local state = not WindowFunctions:GetState()
 		WindowFunctions:SetState(state)
-		WindowFunctions:Notify({
-			Title = Settings.Title,
-			Description = (state and "Maximized " or "Minimized ") .. "the menu. Use " .. tostring(MenuKeybind.Name) .. " to toggle it.",
-			Lifetime = 5
-		})
 	end
 	
 	-- Add hover effect to toggle button
@@ -5490,7 +5485,7 @@ function MacLib:Window(Settings)
 
 	function WindowFunctions:SetAcrylicBlurState(State)
 		acrylicBlur = State
-		base.BackgroundTransparency = State and 0.98 or 0
+		base.BackgroundTransparency = State and 0.8 or 0
 	end
 
 	function WindowFunctions:GetAcrylicBlurState()
